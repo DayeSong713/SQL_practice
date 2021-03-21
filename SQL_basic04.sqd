@@ -1,0 +1,229 @@
+--1. professor 에 있는 모든 지도교수의 지도학생 수를 출력하되, 지도학생이 없는 교수도 출력. 교수이름, 직급, 페이 함께
+
+select p.PROFNO ,p.name, p.POSITION, p.PAY, count(s.PROFNO) 지도학생수, count(p.PROFNO)
+from PROFESSOR p, STUDENT s
+where p.profno = s.PROFNO(+)
+group by p.PROFNO, p.name, p.POSITION, p.PAY
+order by p.name;
+
+select p.name, p.POSITION, p.PAY, count(s.PROFNO) 지도학생수, count(p.PROFNO) 
+from PROFESSOR p, STUDENT s
+where p.profno = s.PROFNO
+group by p.PROFNO, p.name, p.POSITION, p.PAY
+order by p.name;
+
+
+select *
+from student;
+
+select *
+from PROFESSOR;
+
+select name, position, count(PROFNO) 
+from PROFESSOR
+group by name, position, profno;
+
+
+-- 2. emp테이블을 써서 직원이름, 페이, 상위관리자 이름, 페이를 출력하라.
+
+select e1.empno, e1.ename, e1.job, e1.mgr, e2.EMPNO, e2.ename, e2.job
+  from emp e1, emp e2
+ where e1.mgr = e2.EMPNO(+);
+ 
+
+select s1.grade, s1.name, s1.height, '<', s2.name, s2.height
+from student s1, student s2
+where s1.grade = s2. grade and s1.HEIGHT < s2.HEIGHT;
+
+
+
+--3.  student 테이블과 EXAM_01, DEPARTMENT 테이블로 각 학과별 평균점수, 최고점수, 최저점수를 나타내라.
+-- 학과이름, 학과번호와 함께 출력되도록
+
+select s.DEPTNO1, d.DNAME, avg(e.total), min(total), max(total)
+from student s, EXAM_01 e, DEPARTMENT D
+where s.STUDNO = e.STUDNO and s.DEPTNO1 = d.DEPTNO
+group by s.DEPTNO1, d.DNAME;
+
+
+select s.name, s.deptno1, d.dname, e.total
+from student s, EXAM_01 e, DEPARTMENT D
+where s.STUDNO = e.STUDNO and s.DEPTNO1 = d.DEPTNO;
+
+
+--4. STUDENT테이블 내에서 같은 학년내 각 학생보다 키가 큰 학생의 수를 출력하되,
+--학생이름, 학과번호, 학년을 함께 출력하여라.
+
+
+select count(s2.studno), s1.name, s1.deptno1, s1.GRADE
+  from student s1, student s2
+ where s1.grade = s2. grade (+)
+   and s1.HEIGHt < s2.HEIGHT(+)
+group by s1.name,s1.deptno1, s1.GRADE
+order by grade, count(s1.studno);
+
+
+
+
+
+
+
+--5. DEPARTMENT테이블을 사용하여 아래와 같은 형식으로 출력하여라.
+--컴퓨터공학과의 상위학과는 컴퓨터정보학부이다.
+--단, 상위학과가 없는 경우는 학과이름을 그대로 출력(공과대학의 상위학과는 공과대학이다)
+
+
+select d1.dname||'의 상위학과는 '||nvl(d2.dname,d1.dname)||'이다.'
+  from DEPARTMENT d1, DEPARTMENT d2
+ where d1.part = d2.deptno(+);
+
+
+desc DEPARTMENT;
+
+select d1.DEPTNO, d1.DNAME ||'의 상위학과는 '|| d2.DNAME|| ' 이다'
+from DEPARTMENT d1, DEPARTMENT d2
+where trunc(d1.deptno,-1) = d2.DEPTNO;
+
+
+
+
+
+--6. professor 테이블에서 홈페이지 주소가 있으면 그대로 출력, 없으면 아래와 같이 출력
+--http://www.naver.com/email_id
+--단, email_id는 email 주소의 @ 앞의 문자라 가정한다.
+
+
+
+
+select name, email, hpage,
+       nvl(hpage, 'http://www.naver.com/'||substr (email, 1, (instr(email, '@',1)-1))) 홈페이지
+from PROFESSOR;
+   
+
+
+
+--7. emp 테이블에서 각 직원과 같은 해에 입사한 동기중 본인보다 연봉 높은사람의 이름과 소속부서명 출력
+--단 동료직원이 없는 경우도 출력
+
+
+select          e1.ename, e1.sal, to_char(e1.hiredate, 'YYYY') 입사년도1, 
+       d.dname, e2.ename, e2.sal, to_char(e2.hiredate, 'YYYY') 입사년도2
+  from emp e1, emp e2, dept d
+ where to_char(e1.hiredate, 'YYYY') = to_char(e2.hiredate(+), 'YYYY')
+   and e1.sal < e2.sal(+)
+   and e2.deptno = d.deptno(+)
+   order by e1.HIREDATE;
+   
+   select *
+   from emp;
+   
+   select *
+   from DEPT;
+   
+--8. emp 테이블에서 각 직원과 같은 해에 입사한 동기중 본인보다 연봉 높은사람의 수 출력
+--단 동료직원이 없는 경우도 출력
+
+   
+   select          e1.ename, e1.sal, to_char(e1.hiredate, 'YYYY') 입사년도1, count(e2.ename)
+      -- d.dname, e2.ename, e2.sal, to_char(e2.hiredate, 'YYYY') 입사년도2
+  from emp e1, emp e2, dept d
+ where to_char(e1.hiredate, 'YYYY') = to_char(e2.hiredate(+), 'YYYY')
+   and e1.sal < e2.sal(+)
+   and e2.deptno = d.deptno(+)
+   group by e1.ename, e1.sal, to_char(e1.hiredate, 'YYYY')
+   --order by e1.HIREDATE;
+   
+   
+   
+
+--9. STUDENT 테이블에서 id가 bingo인 학생과 같은 학년의 학생번호와 이름, 시험성적 출력
+
+
+select s.grade, s.id, s.studno, s.name, e.total
+from STUDENT s, EXAM_01 e
+where grade = (select grade
+                 from STUDENT
+                where id = 'bingo')
+   and s.studno = e.studno;
+
+
+--10.  STUDENT 테이블에서 제1전공이 101번인 학과의 평균몸무게보다 몸무게가 많은 학생들의 이름과 몸무게 출력
+
+select avg(weight)
+from STUDENT
+where deptno1 = 101
+group by deptno1;
+
+select name, weight
+from STUDENT
+where weight > (select avg(weight)
+from STUDENT
+where deptno1 = 101
+group by deptno1);
+
+
+
+
+
+-- 11. PROFESSOR 테이블에서 심슨과 입사년도가 같으면서 조인형의 급여보다 적게 받는 교수의 이름, 급여, 입사일
+
+
+select *
+from PROFESSOR
+where to_char(hiredate, 'YYYY') = (select to_char(hiredate, 'YYYY')
+                                     from PROFESSOR
+                                    where name = '심슨') 
+  and pay < (select pay
+               from PROFESSOR
+              where name = '조인형');
+
+
+
+
+select to_char(hiredate, 'YYYY')
+from PROFESSOR
+where name = '심슨';
+
+select pay
+from PROFESSOR
+where name = '조인형';
+
+
+
+                       
+
+--12.   student 테이블에서 각 학년별 최대 키를 갖는 학생의 이름, 학년, 키 출력
+
+select name, grade, height
+from STUDENT
+where (grade,height) in
+(select grade, max(height)
+from STUDENT
+group by grade);
+
+
+
+--13. student 테이블에서 각 학년내에 그 학년의 평균키보다 작은 학생의 이름 학년 키 평균키 출력
+
+
+
+select s.name, s.grade, s.height, i.avg_height
+from STUDENT s, (select grade, avg(height) as avg_height 
+               from student
+               group by grade) i
+
+where  s.grade = i.grade and s.height <i.avg_height;
+
+
+--14. emp2 테이블에서 각 직원과 같은 나이이면서 취미가 같은 직원의 수를
+--직원의 이름, 부서이름, 취미, pay와 함께 출력하여라.
+
+select e1.name, trunc((sysdate-e1.birthday)/365) as 직원나이, e1.hobby, d.dname, e1.pay,
+       count(e2.empno)--, trunc((sysdate-e2.birthday)/365) as 직원나이, e2.hobby
+from EMP2 e1, emp2 e2, dept2 d
+where e1.deptno = d.dcode
+ and  trunc((sysdate-e1.birthday)/365) =  trunc((sysdate-e2.birthday(+))/365)
+ and  e1.hobby = e2.hobby(+)
+ and e1.empno != e2.empno(+)
+ group by  e1.name, trunc((sysdate-e1.birthday)/365), e1.hobby, d.dname, e1.pay;
+ 

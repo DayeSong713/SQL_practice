@@ -1,0 +1,115 @@
+--1. deptno가 10이면서 JOB이 CLERK인 직원은 'A', 나머지는 'AA'
+--         20이면서 JOB이 MANAGER인 직원은 'B', 나머지는 'BB'
+--         나머지는 모두 'C'
+         
+select ename, deptno, job,
+       decode(deptno,10,decode(job,'CLERK','A','AA'),
+                     20,decode(job,'MANAGER','B','BB'),
+                        'C')
+  from emp;
+
+
+--2. STUDENT테이블에서 jumin 컬럼을 사용하여 성별 컬럼 생성(남자,여자)
+select NAME, GRADE, JUMIN, substr(JUMIN,7,1),
+       case substr(JUMIN,7,1) when '1' then '남자'
+                              when '2' then '여자'
+        end AS 성별,
+       decode(substr(JUMIN,7,1),'1','남자','여자')
+  from STUDENT;
+
+
+--3. STUDENT테이블에서 성별 키와 몸무게의 최대, 최소를 출력
+select substr(jumin,7,1), max(height), min(height), max(weight), min(weight)
+  from STUDENT
+ group by substr(jumin,7,1);
+  
+--4. PROFESSOR 테이블에서 직급별(POSITION) pay의 평균 출력
+select POSITION, round(avg(pay))
+  from PROFESSOR
+ group by POSITION;
+
+--5. PROFESSOR 테이블에서 입사년도별 pay의 평균 출력
+select to_char(hiredate, 'YYYY') AS 입사년도, avg(pay)
+  from PROFESSOR
+ group by to_char(hiredate, 'YYYY')
+ order by 입사년도;
+
+
+--6. EMP 테이블에서 부서번호가 10이면 ‘A’로, 20이면 ‘B’로, 30이면 
+--         ‘C’로 바꾼 뒤 이름, 업무, 부서번호와 함께 출력하여라.
+select deptno, job, decode(deptno,10,'A',20,'B',30,'C')
+  from emp;
+  
+--7. EMP 테이블에서 JOB이 ANALYST이면 급여 증가는 10%이고,  
+--         CLERK이면 15%, MANAGER이면 20%이고, 다른 업무에 대해서는 
+--         급여 증가가 없다. 사원번호, 이름, 업무, 급여, 증가된 급여를 출력하여라.
+select ename, job, sal, decode(job, 'ANALYST', sal* 1.1,
+                                      'CLERK', sal*1.15,
+                                    'MANAGER', sal*1.2, sal)
+  from emp;
+  
+--8. EMP 테이블의 사원이름, 매니저번호(MGR)를 출력하고, 매니저번호가 
+--         null이면 ‘상위관리자’로 표시하고, 매니저번호가 있으면 ‘7869담당‘으로 
+--         표시하여라.
+select ename, mgr, nvl2(mgr, to_char(mgr)||'담당','상위관리자')
+  from emp;
+
+
+
+
+--9. emp 테이블과 emp2 테이블을 병합하려 한다. 아래 규칙을 따라 병합하세요.
+--출력 결과는 사번, 이름, 부서번호, 연봉(sal 또는 pay)
+--- 사원번호는 모두 네자리로 통일(emp2의 empno의 마지막 네자리)
+--- emp2 테이블의 직원은 부서번호가 40으로 가정
+--- emp2 테이블의 pay도 만단위로 출력(60000000 => 6000)
+select EMPNO, ENAME, DEPTNO, SAL 
+  from emp
+ union all
+select to_number(substr(EMPNO,5)), NAME, 40, PAY/10000
+  from emp2;
+
+select to_char(EMPNO), ENAME, DEPTNO, SAL 
+  from emp
+ union all
+select substr(EMPNO,5), NAME, 40, PAY/10000
+  from emp2;
+
+
+--10. STUDENT테이블과 DEPARTMENT 테이블을 사용하여
+--각 학생의 이름, 학년, 제1전공(deptno1)명을 출력하여라
+select s.NAME, s.GRADE, d.DNAME 
+  from STUDENT s, DEPARTMENT d
+ where s.DEPTNO1 = d.DEPTNO;
+
+--11. 위 테이블을 모두 사용하여 학생의 이름, 학년, 제1전공명, 시험성적 출력
+--테이블 관계 : e-s-d
+select s.NAME, s.GRADE, d.DNAME, e.TOTAL 
+  from STUDENT s, DEPARTMENT d, EXAM_01 e
+ where s.DEPTNO1 = d.DEPTNO
+   and s.STUDNO  = e.STUDNO;
+
+--12. 위 테이블을 모두 사용하여 학생의 이름, 학년, 제1전공명, 시험성적 출력,
+-- 지도교수 이름 출력
+--테이블 관계 : e-s-d
+--                |
+--                p
+
+select s.NAME, s.GRADE, d.DNAME, e.TOTAL, p.NAME 
+  from STUDENT s, DEPARTMENT d, EXAM_01 e, PROFESSOR p
+ where s.DEPTNO1 = d.DEPTNO
+   and s.STUDNO  = e.STUDNO
+   and s.PROFNO = p.PROFNO;
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
